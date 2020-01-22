@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException
 
 import cats.syntax.either._
 import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
-import org.apache.kafka.clients.admin.{AdminClient, CreateTopicsResult, NewTopic}
+import org.apache.kafka.clients.admin.{Admin, AdminClient, CreateTopicsResult, KafkaAdminClient, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
 import pureconfig.ConfigSource
@@ -25,7 +25,7 @@ object TopicCreation extends App {
 
   ConfigSource.default.load[CrocoConfig].map { config =>
 
-    val client = AdminClient.create(config.kafkaConfig.toMap.asJava)
+    val client = Admin.create(config.kafkaConfig.toMap.asJava)
 
     val newTopics = config.topics.map(topic => new NewTopic(topic.name, topic.partitions, topic.replicationFactor))
 
