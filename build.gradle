@@ -1,12 +1,17 @@
 plugins {
     id 'scala'
     id 'application'
-    id 'com.google.cloud.tools.jib' version '1.7.0'
-    id 'com.palantir.docker-compose' version '0.22.1'
+    id 'com.google.cloud.tools.jib' version '2.1.0'
+    id 'com.palantir.docker-compose' version '0.25.0'
 }
 
+version = '0.1.0-SNAPSHOT'
+group = 'fr.xebia.ldi.crocodile'
+
 sourceCompatibility = 1.8
-mainClassName = "fr.xebia.ldi.crocodile.task.DataGeneration"
+targetCompatibility = 1.8
+
+mainClassName = "fr.xebia.ldi.crocodile.StreamingApp"
 
 repositories {
 
@@ -50,9 +55,10 @@ compileScala {
     ]
 }
 
-dockerCompose {
-    dockerComposeFile "docker-compose.yml"
-}
+jib.to.image "${project.name}:${project.version}"
+jib.container.mainClass "${project.group}.task.DataGeneration"
+
+dockerCompose.dockerComposeFile "docker-compose.yml"
 
 task topicCreation(type: JavaExec) {
     main = 'fr.xebia.ldi.crocodile.task.TopicCreation'
@@ -66,11 +72,13 @@ task schemaCreation(type: JavaExec) {
     dependsOn = [topicCreation]
 }
 
-run.dependsOn {
-    [dockerComposeUp, topicCreation, schemaCreation]
+task consumeAccounts(type: JavaExec) {
+    main = 'fr.xebia.ldi.crocodile.AccountConsumer'
+    classpath = sourceSets.main.runtimeClasspath
 }
 
-
-task consume(type: Exec) {
-
-}
+tasks.build.dependsOn jibDockerBuild
+dockerComposeUp.dependsOn jibDockerBuild
+topicCreation.dependsOn dockerComposeUp
+schemaCreation.dependsOn topicCreation
+run.dependsOn schemaCreation
