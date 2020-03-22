@@ -2,15 +2,17 @@ package fr.xebia.ldi
 
 import java.util
 
+import com.sksamuel.avro4s
 import com.sksamuel.avro4s.RecordFormat
-import fr.xebia.ldi.crocodile.schema.{Account, Click}
+import fr.xebia.ldi.crocodile.schema.{Account, Click, UserEvent, ZoneIdConverter}
 import io.confluent.kafka.streams.serdes.avro.{GenericAvroDeserializer, GenericAvroSerializer}
+import org.apache.avro.Schema
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Serializer}
 
 /**
  * Created by loicmdivad.
  */
-package object crocodile {
+package object crocodile extends ZoneIdConverter {
 
     trait GenericSerializer {
       val inner = new GenericAvroSerializer()
@@ -42,10 +44,10 @@ package object crocodile {
       }
     )
 
-  val schemaNameMap: Map[String, Object] = Map(
-
-    "Click" -> Click,
-    "Account" -> Account
+  val schemaNameMap: Map[String, Schema] = Map(
+    "Click" -> avro4s.AvroSchema[Click],
+    "Account" -> avro4s.AvroSchema[Account],
+    "UserEvent" -> avro4s.AvroSchema[UserEvent]
   )
 
 }
