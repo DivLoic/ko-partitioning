@@ -14,35 +14,40 @@ import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Seria
  */
 package object crocodile extends ZoneIdConverter {
 
-    trait GenericSerializer {
-      val inner = new GenericAvroSerializer()
+  trait GenericSerializer {
+    val inner = new GenericAvroSerializer()
+  }
+
+  trait GenericDeserializer {
+    val inner = new GenericAvroDeserializer()
+  }
+
+  def typedSerde[T: RecordFormat]: Serde[T] = Serdes.serdeFrom(
+    new Serializer[T] with GenericSerializer {
+      override def configure(configs: util.Map[String, _], isKey: Boolean): Unit =
+        inner.configure(configs, isKey)
+
+      override def serialize(topic: String, maybeData: T): Array[Byte] =
+        Option(maybeData)
+          .map(data => inner.serialize(topic, implicitly[RecordFormat[T]].to(data)))
+          .getOrElse(Array.emptyByteArray)
+
+      override def close(): Unit = inner.close()
+    },
+
+    new Deserializer[T] with GenericDeserializer {
+      override def configure(configs: util.Map[String, _], isKey: Boolean): Unit =
+        inner.configure(configs, isKey)
+
+      override def deserialize(topic: String, maybeData: Array[Byte]): T =
+        Option(maybeData)
+          .filter(_.nonEmpty)
+          .map(data => implicitly[RecordFormat[T]].from(inner.deserialize(topic, data)))
+          .getOrElse(null.asInstanceOf[T])
+
+      override def close(): Unit = inner.close()
     }
-
-    trait GenericDeserializer {
-      val inner = new GenericAvroDeserializer()
-    }
-
-    def typedSerde[T: RecordFormat]: Serde[T] = Serdes.serdeFrom(
-      new Serializer[T] with GenericSerializer {
-        override def configure(configs: util.Map[String, _], isKey: Boolean): Unit =
-          inner.configure(configs, isKey)
-
-        override def serialize(topic: String, data: T): Array[Byte] =
-          inner.serialize(topic, implicitly[RecordFormat[T]].to(data))
-
-        override def close(): Unit = inner.close()
-      },
-
-      new Deserializer[T] with GenericDeserializer {
-        override def configure(configs: util.Map[String, _], isKey: Boolean): Unit =
-          inner.configure(configs, isKey)
-
-        override def deserialize(topic: String, data: Array[Byte]): T =
-          implicitly[RecordFormat[T]].from(inner.deserialize(topic, data))
-
-        override def close(): Unit = inner.close()
-      }
-    )
+  )
 
   val schemaNameMap: Map[String, Schema] = Map(
     "Click" -> avro4s.AvroSchema[Click],
