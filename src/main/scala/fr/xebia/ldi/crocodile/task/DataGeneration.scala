@@ -6,9 +6,12 @@ import cats.syntax.either._
 import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.xebia.ldi.crocodile.schema.Account.{AccountUpdate, Free, Gold, Plus}
 import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click}
+import fr.xebia.ldi.crocodile.task.DataGeneration.CustomPartitioner.ZeroPartitioner
 import fr.xebia.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.clients.producer.internals.DefaultPartitioner
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.common.Cluster
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
@@ -23,9 +26,7 @@ object DataGeneration extends App with CrocoSerde {
 
   val logger =  LoggerFactory.getLogger(getClass)
 
-  ConfigSource.default.load[CrocoConfig]
-
-    .map { config =>
+  ConfigSource.default.load[CrocoConfig].map { config =>
 
       clickSerde :: accountSerde :: Nil foreach(_.configure(config.kafkaConfig.toMap.asJava, false))
       accountIdSerde.configure(config.kafkaConfig.toMap.asJava, true)
@@ -37,13 +38,13 @@ object DataGeneration extends App with CrocoSerde {
         assert(subjects.length == schemaNameMap.size * 2)
       })
 
-      val account1 = Account("matthieu@xebia.fr", Plus, Option(AccountUpdate()))
-      val account2 = Account("sylvain@xebia.fr", Gold, Option(AccountUpdate()))
-      val account3 = Account("sophie@xebia.fr", Free, Option(AccountUpdate()))
-      val account4 = Account("ben@xebia.fr", Free, Option(AccountUpdate()))
+      val account1 = Account("matthieu@xebia.fr", Option(Plus), AccountUpdate())
+      val account2 = Account("sylvain@xebia.fr", Option(Gold), AccountUpdate())
+      val account3 = Account("sophie@xebia.fr", Option(Free), AccountUpdate())
+      val account4 = Account("ben@xebia.fr", Option(Free), AccountUpdate())
 
       val accountProducer = new KafkaProducer[AccountId, Account](
-        config.kafkaConfig.toMap.asJava,
+        config.kafkaConfig.toMap + ((ProducerConfig.PARTITIONER_CLASS_CONFIG, classOf[ZeroPartitioner])) asJava,
         accountIdSerde.serializer(),
         accountSerde.serializer()
       )
@@ -63,7 +64,7 @@ object DataGeneration extends App with CrocoSerde {
 
       for(_ <- 0 to 100) {
 
-        for (index <- 1 to 4) {
+        for (index <- 0 to 3) {
           Thread.sleep(1000)
           val id = AccountId(s"ID-00$index")
           val click = Click(UUID.randomUUID().toString)
@@ -84,4 +85,12 @@ object DataGeneration extends App with CrocoSerde {
         logger.error("Unknown error: ", failures)
         sys.exit(1)
     }
+
+
+  object CustomPartitioner {
+
+    class ZeroPartitioner extends DefaultPartitioner {
+      override def partition(a: String, b: Any, c: Array[Byte], d: Any, e: Array[Byte], f: Cluster): Int = 1
+    }
+  }
 }
