@@ -38,7 +38,7 @@ dependencies {
     implementation group: 'io.confluent', name: 'monitoring-interceptors', version: '5.4.0'
 
     testRuntimeOnly group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '1.2.0'
-    testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.0.8'
+    testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.1.1'
 
 }
 
@@ -73,12 +73,38 @@ task schemaCreation(type: JavaExec) {
 }
 
 task consumeAccounts(type: JavaExec) {
-    main = 'fr.xebia.ldi.crocodile.AccountConsumer'
+    main = 'fr.xebia.ldi.crocodile.task.consumer.AccountTable'
     classpath = sourceSets.main.runtimeClasspath
 }
 
-tasks.build.dependsOn jibDockerBuild
-dockerComposeUp.dependsOn jibDockerBuild
-topicCreation.dependsOn dockerComposeUp
-schemaCreation.dependsOn topicCreation
+task consumeClicks(type: JavaExec) {
+    main = 'fr.xebia.ldi.crocodile.task.consumer.ClickStream'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+class CleanUpState extends DefaultTask {
+
+    @TaskAction
+    void clean() {
+        new File("/tmp/kafka-streams/ACCOUNT-CONSUMER").deleteDir()
+        new File("/tmp/kafka-streams/CLICK-JOINER-APP").deleteDir()
+    }
+}
+
+task spec(type: JavaExec) {
+    group = 'verification'
+    dependsOn = [compileTestScala]
+    main = 'org.scalatest.tools.Runner'
+    description = 'Runs the scala tests.'
+    classpath = sourceSets.test.runtimeClasspath
+    args = ['-R', 'build/classes/scala/test', '-o']
+}
+
+tasks.register("cleanUpState", CleanUpState) {
+    group = 'application'
+    description = 'Remove locals Kafka Streams internal states'
+}
+
+test.dependsOn spec
 run.dependsOn schemaCreation
+dockerComposeUp.dependsOn jibDockerBuild
