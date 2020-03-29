@@ -6,28 +6,27 @@ import cats.syntax.either._
 import com.sksamuel.avro4s.AvroSchema
 import com.typesafe.config.ConfigFactory
 import fr.xebia.ldi.crocodile.Configuration.CrocoConfig
-import fr.xebia.ldi.crocodile.schema.{AccountId, Click}
+import fr.xebia.ldi.crocodile.schema._
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
-
-import scala.util.{Failure, Success, Try}
 import pureconfig.generic.auto._
 
 import scala.annotation.tailrec
 import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success, Try}
 
 /**
  * Created by loicmdivad.
  */
-object SchemaCreation extends App {
+object SchemaCreation extends App with ZoneIdConverter{
 
   private val logger = LoggerFactory.getLogger(getClass)
 
   @tailrec
-  def retryCallSchemaRegistry(countdown: Int, interval: Duration, f: => Unit): Try[Unit] = {
+  def retryCallSchemaRegistry(logger: Logger)(countdown: Int, interval: Duration, f: => Unit): Try[Unit] = {
     Try(f) match {
       case result@Success(_) =>
         logger info "Successfully call the Schema Registry."
@@ -38,7 +37,7 @@ object SchemaCreation extends App {
       case Failure(_) if countdown > 0 =>
         logger error s"Fail to call the Schema Registry, retry in ${interval.toSeconds} secs."
         Thread.sleep(interval.toMillis)
-        retryCallSchemaRegistry(countdown - 1, interval, f)
+        retryCallSchemaRegistry(logger)(countdown - 1, interval, f)
     }
   }
 
@@ -48,13 +47,15 @@ object SchemaCreation extends App {
     val registryUrl = config.kafkaConfig.getString("schema.registry.url")
     val schemaRegistryClient = new CachedSchemaRegistryClient(registryUrl, 200)
 
-    retryCallSchemaRegistry(
+    retryCallSchemaRegistry(logger)(
       config.taskConfig.schemaRegistryRetriesNum,
       config.taskConfig.schemaRegistryRetriesInterval, {
-        schemaRegistryClient.register(s"CLICK-key", AvroSchema[AccountId])
-        schemaRegistryClient.register(s"ACCOUNT-key", AvroSchema[AccountId])
-        schemaRegistryClient.register(s"CLICK-value", AvroSchema[Click])
-        schemaRegistryClient.register(s"ACCOUNT-value", AvroSchema[AccountId])
+        schemaRegistryClient.register(s"CLICK-TOPIC-key", AvroSchema[AccountId])
+        schemaRegistryClient.register(s"ACCOUNT-TOPIC-key", AvroSchema[AccountId])
+        schemaRegistryClient.register(s"OUTPUT-TOPIC-key", AvroSchema[AccountId])
+        schemaRegistryClient.register(s"CLICK-TOPIC-value", AvroSchema[Click])
+        schemaRegistryClient.register(s"ACCOUNT-TOPIC-value", AvroSchema[Account])
+        schemaRegistryClient.register(s"OUTPUT-TOPIC-value", AvroSchema[UserEvent])
       }
     ) match {
       case failure@Failure(_: IOException | _: RestClientException) =>

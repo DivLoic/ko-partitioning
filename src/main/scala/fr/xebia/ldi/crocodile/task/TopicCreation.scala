@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException
 
 import cats.syntax.either._
 import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
-import org.apache.kafka.clients.admin.{Admin, AdminClient, CreateTopicsResult, KafkaAdminClient, NewTopic}
+import org.apache.kafka.clients.admin.{Admin, CreateTopicsResult, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
 import pureconfig.ConfigSource
@@ -55,7 +55,7 @@ object TopicCreation extends App {
     Try(allKFutures.all().get(wait._1, wait._2)) match {
 
       case Failure(ex) if ex.getCause.isInstanceOf[TopicExistsException] =>
-        logger info "Creation stage completed."
+        logger info "Topic creation stage completed. (Topics already created)"
 
       case failure@Failure(_: InterruptedException | _: ExecutionException) =>
         logger error "The topic creation failed to complete"
@@ -68,7 +68,7 @@ object TopicCreation extends App {
         sys.exit(3)
 
       case Success(_) =>
-        logger info "Creation stage completed."
+        logger info "Topic creation stage completed."
     }
   }
 

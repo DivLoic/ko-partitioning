@@ -6,7 +6,7 @@ import cats.syntax.either._
 import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.xebia.ldi.crocodile.schema.Account.{AccountUpdate, Free, Gold, Plus}
 import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click}
-import fr.xebia.ldi.crocodile.task.DataGeneration.CustomPartitioner.ZeroPartitioner
+import fr.xebia.ldi.crocodile.task.DataGeneration.CustomPartitioner.ConstPartitioner
 import fr.xebia.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner
@@ -24,57 +24,59 @@ import scala.jdk.CollectionConverters._
  */
 object DataGeneration extends App with CrocoSerde {
 
-  val logger =  LoggerFactory.getLogger(getClass)
+  val logger = LoggerFactory.getLogger(getClass)
 
   ConfigSource.default.load[CrocoConfig].map { config =>
 
-      clickSerde :: accountSerde :: Nil foreach(_.configure(config.kafkaConfig.toMap.asJava, false))
-      accountIdSerde.configure(config.kafkaConfig.toMap.asJava, true)
+    clickSerde :: accountSerde :: Nil foreach (_.configure(config.kafkaConfig.toMap.asJava, false))
+    accountIdSerde.configure(config.kafkaConfig.toMap.asJava, true)
 
-      import scala.concurrent.duration._
-      SchemaCreation.retryCallSchemaRegistry(logger)(10, 2 second, {
-        val client = new CachedSchemaRegistryClient(config.kafkaConfig.getString("schema.registry.url"), 10)
-        val subjects = client.getAllSubjects.asScala.toVector
-        assert(subjects.length == schemaNameMap.size * 2)
-      })
+    import scala.concurrent.duration._
+    SchemaCreation.retryCallSchemaRegistry(logger)(10, 2 second, {
+      val client = new CachedSchemaRegistryClient(config.kafkaConfig.getString("schema.registry.url"), 10)
+      val subjects = client.getAllSubjects.asScala.toVector
+      assert(subjects.length == schemaNameMap.size * 2)
+    })
 
-      val account1 = Account("matthieu@xebia.fr", Option(Plus), AccountUpdate())
-      val account2 = Account("sylvain@xebia.fr", Option(Gold), AccountUpdate())
-      val account3 = Account("sophie@xebia.fr", Option(Free), AccountUpdate())
-      val account4 = Account("ben@xebia.fr", Option(Free), AccountUpdate())
+    val account1 = Account("matthieu@xebia.fr", Option(Plus), AccountUpdate())
+    val account2 = Account("sylvain@xebia.fr", Option(Gold), AccountUpdate())
+    val account3 = Account("sophie@xebia.fr", Option(Free), AccountUpdate())
+    val account4 = Account("ben@xebia.fr", Option(Free), AccountUpdate())
 
-      val accountProducer = new KafkaProducer[AccountId, Account](
-        config.kafkaConfig.toMap + ((ProducerConfig.PARTITIONER_CLASS_CONFIG, classOf[ZeroPartitioner])) asJava,
-        accountIdSerde.serializer(),
-        accountSerde.serializer()
-      )
+    val accountProducer = new KafkaProducer[AccountId, Account](
+      config.kafkaConfig.toMap + ((ProducerConfig.PARTITIONER_CLASS_CONFIG, classOf[ConstPartitioner])) asJava,
+      accountIdSerde.serializer(),
+      accountSerde.serializer()
+    )
 
-      val clickProducer = new KafkaProducer[AccountId, Click](
-        config.kafkaConfig.toMap.asJava,
-        accountIdSerde.serializer(),
-        clickSerde.serializer()
-      )
+    val clickProducer = new KafkaProducer[AccountId, Click](
+      config.kafkaConfig.toMap.asJava,
+      accountIdSerde.serializer(),
+      clickSerde.serializer()
+    )
 
-      (account1 :: account2 :: account3 :: account4 :: Nil zipWithIndex) foreach {
-        case (account, index) =>
-            val id = AccountId(s"ID-00$index")
-            val record: ProducerRecord[AccountId, Account] = new ProducerRecord("ACCOUNT-TOPIC", id, account)
-          accountProducer.send(record)
-      }
-
-      for(_ <- 0 to 100) {
-
-        for (index <- 0 to 3) {
-          Thread.sleep(1000)
-          val id = AccountId(s"ID-00$index")
-          val click = Click(UUID.randomUUID().toString)
-          val record = new ProducerRecord("CLICK-TOPIC", id, click)
-          clickProducer.send(record)
-        }
-      }
-
-      logger info "Closing the data generator ..."
+    (account1 :: account2 :: account3 :: account4 :: Nil zipWithIndex) foreach {
+      case (account, index) =>
+        val id = AccountId(s"ID-00$index")
+        val record: ProducerRecord[AccountId, Account] = new ProducerRecord("ACCOUNT-TOPIC", 1, id, account)
+        accountProducer.send(record)
     }
+
+    accountProducer.flush()
+
+    for (_ <- 0 to 100) {
+
+      for (index <- 0 to 3) {
+        Thread.sleep(1000)
+        val id = AccountId(s"ID-00$index")
+        val click = Click(UUID.randomUUID().toString)
+        val record = new ProducerRecord("CLICK-TOPIC", id, click)
+        clickProducer.send(record)
+      }
+    }
+
+    logger info "Closing the data generator ..."
+  }
 
     .recover {
       case failures: ConfigReaderFailures =>
@@ -89,8 +91,10 @@ object DataGeneration extends App with CrocoSerde {
 
   object CustomPartitioner {
 
-    class ZeroPartitioner extends DefaultPartitioner {
-      override def partition(a: String, b: Any, c: Array[Byte], d: Any, e: Array[Byte], f: Cluster): Int = 1
+    class ConstPartitioner extends DefaultPartitioner {
+      override def partition(a: String, b: Any, c: Array[Byte], d: Any, e: Array[Byte], f: Cluster): Int = 2
     }
+
   }
+
 }

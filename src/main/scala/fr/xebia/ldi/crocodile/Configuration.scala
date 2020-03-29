@@ -1,18 +1,15 @@
 package fr.xebia.ldi.crocodile
 
-import com.sksamuel.avro4s
-import com.sksamuel.avro4s.AvroSchema
+import java.util.Properties
+
 import com.typesafe.config.Config
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig.{CrocoTask, CrocoTopic}
-import fr.xebia.ldi.crocodile.schema.Click
+import fr.xebia.ldi.crocodile.Configuration.CrocoConfig.{CrocoApp, CrocoTask, CrocoTopic}
 import org.apache.avro.reflect.AvroSchema
-import pureconfig.ConfigReader.Result
 import pureconfig.generic.ProductHint
-import pureconfig.{CamelCase, ConfigCursor, ConfigFieldMapping, ConfigReader, StringDelimitedNamingConvention}
+import pureconfig.{CamelCase, ConfigFieldMapping, StringDelimitedNamingConvention}
 
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
-import scala.reflect.{ClassTag, ManifestFactory}
 
 /**
  * Created by loicmdivad.
@@ -29,9 +26,23 @@ object Configuration {
       .asScala
       .map(pair => (pair.getKey, config.getAnyRef(pair.getKey)))
       .toMap
+
+    def toProps: Properties = {
+      val properties = new Properties()
+      properties.putAll(config.toMap.asJava)
+      properties
+    }
   }
 
-  case class CrocoConfig(kafkaConfig: Config, topics: Vector[CrocoTopic], taskConfig: CrocoTask)
+  implicit class propertiesOps(map: Map[String, AnyRef]) {
+    def toProps: Properties = {
+      val properties = new Properties()
+      properties.putAll(map.asJava)
+      properties
+    }
+  }
+
+  case class CrocoConfig(kafkaConfig: Config, topics: Vector[CrocoTopic], taskConfig: CrocoTask, application: CrocoApp)
 
   object CrocoConfig {
 
@@ -43,6 +54,7 @@ object Configuration {
 
     case class CrocoTopic(name: String, partitions: Int, replicationFactor: Short)
 
+    case class CrocoApp(inputClickTopic: String, inputAccountTopic: String, outputResult: String)
   }
 
 }
