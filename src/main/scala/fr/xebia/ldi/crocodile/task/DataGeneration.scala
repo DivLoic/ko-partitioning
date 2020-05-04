@@ -55,6 +55,8 @@ object DataGeneration extends App with CrocoSerde {
       clickSerde.serializer()
     )
 
+    logger info "Sending the first Account events"
+
     (account1 :: account2 :: account3 :: account4 :: Nil zipWithIndex) foreach {
       case (account, index) =>
         val id = AccountId(s"ID-00$index")
@@ -63,6 +65,8 @@ object DataGeneration extends App with CrocoSerde {
     }
 
     accountProducer.flush()
+
+    logger info "Sending the clicks events"
 
     for (_ <- 0 to 100) {
 
