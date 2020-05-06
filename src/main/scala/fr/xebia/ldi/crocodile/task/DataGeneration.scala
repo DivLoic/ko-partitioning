@@ -6,11 +6,10 @@ import cats.syntax.either._
 import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.xebia.ldi.crocodile.schema.Account.{AccountUpdate, Free, Gold, Plus}
 import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click}
-import fr.xebia.ldi.crocodile.task.DataGeneration.CustomPartitioner.ConstPartitioner
 import fr.xebia.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.Cluster
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
@@ -44,7 +43,7 @@ object DataGeneration extends App with CrocoSerde {
     val account4 = Account("ben@xebia.fr", Option(Free), AccountUpdate())
 
     val accountProducer = new KafkaProducer[AccountId, Account](
-      config.kafkaConfig.toMap + ((ProducerConfig.PARTITIONER_CLASS_CONFIG, classOf[ConstPartitioner])) asJava,
+      config.kafkaConfig.toMap.asJava,
       accountIdSerde.serializer(),
       accountSerde.serializer()
     )
@@ -60,7 +59,7 @@ object DataGeneration extends App with CrocoSerde {
     (account1 :: account2 :: account3 :: account4 :: Nil zipWithIndex) foreach {
       case (account, index) =>
         val id = AccountId(s"ID-00$index")
-        val record: ProducerRecord[AccountId, Account] = new ProducerRecord("ACCOUNT-TOPIC", 1, id, account)
+        val record: ProducerRecord[AccountId, Account] = new ProducerRecord("ACCOUNT-TOPIC", id, account)
         accountProducer.send(record)
     }
 
@@ -92,13 +91,10 @@ object DataGeneration extends App with CrocoSerde {
         sys.exit(1)
     }
 
-
   object CustomPartitioner {
 
     class ConstPartitioner extends DefaultPartitioner {
       override def partition(a: String, b: Any, c: Array[Byte], d: Any, e: Array[Byte], f: Cluster): Int = 2
     }
-
   }
-
 }
