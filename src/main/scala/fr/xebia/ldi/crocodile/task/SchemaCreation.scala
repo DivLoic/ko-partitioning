@@ -4,6 +4,7 @@ import java.io.IOException
 
 import cats.syntax.either._
 import com.sksamuel.avro4s.AvroSchema
+import io.confluent.kafka.schemaregistry.avro.{AvroSchema => Schema}
 import com.typesafe.config.ConfigFactory
 import fr.xebia.ldi.crocodile.Configuration.CrocoConfig
 import fr.xebia.ldi.crocodile.schema._
@@ -21,7 +22,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * Created by loicmdivad.
  */
-object SchemaCreation extends App with ZoneIdConverter{
+object SchemaCreation extends App with ZoneIdConverter {
 
   private val logger = LoggerFactory.getLogger(getClass)
 
@@ -50,12 +51,12 @@ object SchemaCreation extends App with ZoneIdConverter{
     retryCallSchemaRegistry(logger)(
       config.taskConfig.schemaRegistryRetriesNum,
       config.taskConfig.schemaRegistryRetriesInterval, {
-        schemaRegistryClient.register(s"CLICK-TOPIC-key", AvroSchema[AccountId])
-        schemaRegistryClient.register(s"ACCOUNT-TOPIC-key", AvroSchema[AccountId])
-        schemaRegistryClient.register(s"OUTPUT-TOPIC-key", AvroSchema[AccountId])
-        schemaRegistryClient.register(s"CLICK-TOPIC-value", AvroSchema[Click])
-        schemaRegistryClient.register(s"ACCOUNT-TOPIC-value", AvroSchema[Account])
-        schemaRegistryClient.register(s"OUTPUT-TOPIC-value", AvroSchema[UserEvent])
+        schemaRegistryClient.register(s"CLICK-TOPIC-key", new Schema(AvroSchema[AccountId]))
+        schemaRegistryClient.register(s"ACCOUNT-TOPIC-key", new Schema(AvroSchema[AccountId]))
+        schemaRegistryClient.register(s"OUTPUT-TOPIC-key", new Schema(AvroSchema[AccountId]))
+        schemaRegistryClient.register(s"CLICK-TOPIC-value", new Schema(AvroSchema[Click]))
+        schemaRegistryClient.register(s"ACCOUNT-TOPIC-value", new Schema(AvroSchema[Account]))
+        schemaRegistryClient.register(s"OUTPUT-TOPIC-value", new Schema(AvroSchema[UserEvent]))
       }
     ) match {
       case failure@Failure(_: IOException | _: RestClientException) =>
