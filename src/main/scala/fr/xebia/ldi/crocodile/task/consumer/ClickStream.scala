@@ -38,7 +38,7 @@ object ClickStream extends App with ColorizedConsumer with CrocoSerde  {
 
       .selectKey((account, _) => account.copy(colorize(account.value)))
 
-      .print(Printed.toSysOut[AccountId, UserEvent].withLabel("📱 USER-EVENT"))
+      .print(Printed.toSysOut[AccountId, UserEvent].withLabel("📱CLICKS"))
 
 
     val streams = new KafkaStreams(builder.build, streamConfig.toProps)

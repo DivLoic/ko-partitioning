@@ -11,7 +11,12 @@ case class UserEvent(@AvroName("page_id")
                      login: String,
                      plan: Option[Plan],
                      @AvroName("last_update")
-                     lastUpdate: AccountUpdate)
+                     lastUpdate: AccountUpdate) {
+
+  override def toString: String =
+    s"event: ${pageId.take(6)}..., plan: ${plan.orElse(None).map(_.toString.padTo(6, " ").mkString).orNull} ($login)"
+
+}
 
 object UserEvent extends ZoneIdConverter {
 
