@@ -34,7 +34,7 @@ object ClickStream extends App with ColorizedConsumer with CrocoSerde  {
 
     builder
 
-      .stream(config.application.outputResult)
+      .stream(config.application.outputResult.name)
 
       .selectKey((account, _) => account.copy(colorize(account.value)))
 

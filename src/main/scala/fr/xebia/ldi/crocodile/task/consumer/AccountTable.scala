@@ -59,7 +59,7 @@ object AccountTable extends App with ColorizedConsumer with CrocoSerde {
 
     builder
 
-      .stream(config.application.inputAccountTopic)
+      .stream(config.application.inputAccountTopic.name)
 
       .to(InternalAccountTopic)
 

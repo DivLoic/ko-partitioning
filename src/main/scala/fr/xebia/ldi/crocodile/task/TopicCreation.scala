@@ -27,9 +27,14 @@ object TopicCreation extends App {
 
     val client = Admin.create(config.kafkaConfig.toMap.asJava)
 
-    val newTopics = config.topics.map(topic => new NewTopic(topic.name, topic.partitions, topic.replicationFactor))
+    val newTopics = config
+      .application
+      .topics
+      .map { topic =>
+        new NewTopic(topic.name, topic.partitions, topic.replicationFactor)
+      }
 
-    logger.info(s"Starting the topics creation for: ${config.topics.map(_.name).mkString(", ")}")
+    logger.info(s"Starting the topics creation for: ${config.application.topics.map(_.name).mkString(", ")}")
 
     val allKFutures: CreateTopicsResult = client.createTopics(newTopics.asJava)
 
@@ -70,9 +75,8 @@ object TopicCreation extends App {
       case Success(_) =>
         logger info "Topic creation stage completed."
     }
-  }
+  }.recover {
 
-    .recover {
       case failures: ConfigReaderFailures =>
         failures.toList.foreach(failure => logger.error(failure.description))
         sys.exit(1)
@@ -81,5 +85,4 @@ object TopicCreation extends App {
         logger.error("Unknown error: ", failures)
         sys.exit(1)
     }
-
 }

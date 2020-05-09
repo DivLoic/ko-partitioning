@@ -42,7 +42,7 @@ object Configuration {
     }
   }
 
-  case class CrocoConfig(kafkaConfig: Config, topics: Vector[CrocoTopic], taskConfig: CrocoTask, application: CrocoApp)
+  case class CrocoConfig(kafkaConfig: Config, taskConfig: CrocoTask, application: CrocoApp)
 
   object CrocoConfig {
 
@@ -54,7 +54,10 @@ object Configuration {
 
     case class CrocoTopic(name: String, partitions: Int, replicationFactor: Short)
 
-    case class CrocoApp(inputClickTopic: String, inputAccountTopic: String, outputResult: String)
+    case class CrocoApp(inputClickTopic: CrocoTopic, inputAccountTopic: CrocoTopic, outputResult: CrocoTopic) {
+
+      def topics: Vector[CrocoTopic] = inputClickTopic :: inputAccountTopic :: outputResult :: Nil toVector
+    }
   }
 
 }
