@@ -2,7 +2,7 @@ package fr.xebia.ldi.crocodile
 
 import java.util.Properties
 
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigFactory}
 import fr.xebia.ldi.crocodile.Configuration.CrocoConfig.{CrocoApp, CrocoTask, CrocoTopic}
 import org.apache.avro.reflect.AvroSchema
 import pureconfig.generic.ProductHint
@@ -42,15 +42,17 @@ object Configuration {
     }
   }
 
-  case class CrocoConfig(kafkaConfig: Config, taskConfig: CrocoTask, application: CrocoApp)
+  case class CrocoConfig(application: CrocoApp,
+                         kafkaConfig: Config = ConfigFactory.empty(),
+                         taskConfig: CrocoTask = CrocoTask(300, Duration.Zero, Duration.Zero))
 
   object CrocoConfig {
 
     case class CrocoSchema(subject: String, schema: AvroSchema)
 
     case class CrocoTask(schemaRegistryRetriesNum: Int,
-                         schemaRegistryRetriesInterval: Duration,
-                         topicCreationTimeout: Duration)
+                         topicCreationTimeout: Duration,
+                         schemaRegistryRetriesInterval: Duration)
 
     case class CrocoTopic(name: String, partitions: Int, replicationFactor: Short)
 

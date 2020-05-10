@@ -12,6 +12,8 @@ case class Account(login: String, plan: Option[Plan], @AvroName("last_update") l
 
 object Account extends ZoneIdConverter {
 
+  def apply(login: String, plan: Plan): Account = new Account(login, Some(plan), AccountUpdate())
+
   implicit val recordFormat: RecordFormat[Account] = RecordFormat[Account]
 
   sealed trait Plan

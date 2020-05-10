@@ -8,8 +8,8 @@ import org.apache.kafka.common.serialization.Serde
  */
 trait CrocoSerde {
 
-  val clickSerde: Serde[Click] = typedSerde[Click]
-  val accountSerde: Serde[Account] = typedSerde[Account]
-  val accountIdSerde: Serde[AccountId] = typedSerde[AccountId]
-  val userEventSerde: Serde[UserEvent] = typedSerde[UserEvent]
+  implicit val clickSerde: Serde[Click] = typedSerde[Click]
+  implicit val accountSerde: Serde[Account] = typedSerde[Account]
+  implicit val accountIdSerde: Serde[AccountId] = typedSerde[AccountId]
+  implicit val userEventSerde: Serde[UserEvent] = typedSerde[UserEvent]
 }

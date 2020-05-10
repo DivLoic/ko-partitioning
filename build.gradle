@@ -34,14 +34,14 @@ dependencies {
 
     implementation group: 'io.confluent', name: 'kafka-avro-serializer', version: '5.5.0'
     implementation group: 'io.confluent', name: 'kafka-streams-avro-serde', version: '5.5.0'
-    implementation group: 'io.confluent', name: 'monitoring-interceptors', version: '5.5.0'
 
     testImplementation group: 'org.scalactic', name: 'scalactic_2.13', version: '3.1.1'
     testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.1.1'
+    testImplementation group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.5.0'
 
 }
 
-compileScala {
+tasks.withType(ScalaCompile) {
     scalaCompileOptions.additionalParameters = [
             '-encoding', 'utf8',
             '-feature',
