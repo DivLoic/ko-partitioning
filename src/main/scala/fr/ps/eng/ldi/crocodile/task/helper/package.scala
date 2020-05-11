@@ -1,4 +1,4 @@
-package fr.xebia.ldi.crocodile.task
+package fr.ps.eng.ldi.crocodile.task
 
 /**
  * Created by loicmdivad.

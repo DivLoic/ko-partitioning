@@ -1,4 +1,4 @@
-package fr.xebia.ldi.crocodile.schema
+package fr.ps.eng.ldi.crocodile.schema
 
 import com.sksamuel.avro4s.RecordFormat
 

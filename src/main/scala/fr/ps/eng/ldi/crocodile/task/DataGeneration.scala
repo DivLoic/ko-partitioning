@@ -1,12 +1,12 @@
-package fr.xebia.ldi.crocodile.task
+package fr.ps.eng.ldi.crocodile.task
 
 import java.util.UUID
 
 import cats.syntax.either._
-import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
-import fr.xebia.ldi.crocodile.schema.Account.{AccountUpdate, Free, Gold, Plus}
-import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click}
-import fr.xebia.ldi.crocodile.{CrocoSerde, schemaNameMap}
+import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.schema.Account.{AccountUpdate, Free, Gold, Plus}
+import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click}
+import fr.ps.eng.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
@@ -37,10 +37,10 @@ object DataGeneration extends App with CrocoSerde {
       assert(subjects.length == schemaNameMap.size * 2)
     })
 
-    val account1 = Account("matthieu@xebia.fr", Option(Plus), AccountUpdate())
-    val account2 = Account("sylvain@xebia.fr", Option(Gold), AccountUpdate())
-    val account3 = Account("sophie@xebia.fr", Option(Free), AccountUpdate())
-    val account4 = Account("ben@xebia.fr", Option(Free), AccountUpdate())
+    val account1 = Account("matthieu@ps-eng.fr", Option(Plus), AccountUpdate())
+    val account2 = Account("sylvain@ps-eng.fr", Option(Gold), AccountUpdate())
+    val account3 = Account("sophie@ps-eng.fr", Option(Free), AccountUpdate())
+    val account4 = Account("ben@ps-eng.fr", Option(Free), AccountUpdate())
 
     val accountProducer = new KafkaProducer[AccountId, Account](
       config.kafkaConfig.toMap.asJava,

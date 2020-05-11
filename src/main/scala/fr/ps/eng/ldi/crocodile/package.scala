@@ -1,10 +1,10 @@
-package fr.xebia.ldi
+package fr.ps.eng.ldi
 
 import java.util
 
 import com.sksamuel.avro4s
 import com.sksamuel.avro4s.RecordFormat
-import fr.xebia.ldi.crocodile.schema.{Account, Click, UserEvent, ZoneIdConverter}
+import fr.ps.eng.ldi.crocodile.schema.{Account, Click, UserEvent, ZoneIdConverter}
 import io.confluent.kafka.streams.serdes.avro.{GenericAvroDeserializer, GenericAvroSerializer}
 import org.apache.avro.Schema
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Serializer}

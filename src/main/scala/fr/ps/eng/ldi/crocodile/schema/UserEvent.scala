@@ -1,7 +1,7 @@
-package fr.xebia.ldi.crocodile.schema
+package fr.ps.eng.ldi.crocodile.schema
 
 import com.sksamuel.avro4s.{AvroName, RecordFormat}
-import fr.xebia.ldi.crocodile.schema.Account.{AccountUpdate, Plan}
+import fr.ps.eng.ldi.crocodile.schema.Account.{AccountUpdate, Plan}
 
 /**
  * Created by loicmdivad.

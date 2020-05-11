@@ -1,6 +1,6 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
-import fr.xebia.ldi.crocodile.task.helper.{ANSI_RESET, AccountColorMap}
+import fr.ps.eng.ldi.crocodile.task.helper.{ANSI_RESET, AccountColorMap}
 
 /**
  * Created by loicmdivad.

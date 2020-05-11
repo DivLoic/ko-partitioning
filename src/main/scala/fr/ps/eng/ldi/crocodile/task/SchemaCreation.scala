@@ -1,13 +1,13 @@
-package fr.xebia.ldi.crocodile.task
+package fr.ps.eng.ldi.crocodile.task
 
 import java.io.IOException
 
 import cats.syntax.either._
 import com.sksamuel.avro4s.AvroSchema
-import io.confluent.kafka.schemaregistry.avro.{AvroSchema => Schema}
 import com.typesafe.config.ConfigFactory
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig
-import fr.xebia.ldi.crocodile.schema._
+import fr.ps.eng.ldi.crocodile.Configuration.CrocoConfig
+import fr.ps.eng.ldi.crocodile.schema._
+import io.confluent.kafka.schemaregistry.avro.{AvroSchema => Schema}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import org.slf4j.{Logger, LoggerFactory}

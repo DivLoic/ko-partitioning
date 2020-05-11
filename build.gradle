@@ -6,12 +6,12 @@ plugins {
 }
 
 version = '0.1.0-SNAPSHOT'
-group = 'fr.xebia.ldi.crocodile'
+group = 'fr.ps.eng.ldi.crocodile'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-mainClassName = "fr.xebia.ldi.crocodile.StreamingApp"
+mainClassName = "fr.ps.eng.ldi.crocodile.StreamingApp"
 
 repositories {
 
@@ -60,24 +60,24 @@ jib.container.mainClass "${project.group}.task.DataGeneration"
 dockerCompose.dockerComposeFile "docker-compose.yml"
 
 task topicCreation(type: JavaExec) {
-    main = 'fr.xebia.ldi.crocodile.task.TopicCreation'
+    main = 'fr.ps.eng.ldi.crocodile.task.TopicCreation'
     classpath = sourceSets.main.runtimeClasspath
     dependsOn = [dockerComposeUp]
 }
 
 task schemaCreation(type: JavaExec) {
-    main = 'fr.xebia.ldi.crocodile.task.SchemaCreation'
+    main = 'fr.ps.eng.ldi.crocodile.task.SchemaCreation'
     classpath = sourceSets.main.runtimeClasspath
     dependsOn = [topicCreation]
 }
 
 task consumeAccounts(type: JavaExec) {
-    main = 'fr.xebia.ldi.crocodile.task.consumer.AccountTable'
+    main = 'fr.ps.eng.ldi.crocodile.task.consumer.AccountTable'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task consumeClicks(type: JavaExec) {
-    main = 'fr.xebia.ldi.crocodile.task.consumer.ClickStream'
+    main = 'fr.ps.eng.ldi.crocodile.task.consumer.ClickStream'
     classpath = sourceSets.main.runtimeClasspath
 }
 

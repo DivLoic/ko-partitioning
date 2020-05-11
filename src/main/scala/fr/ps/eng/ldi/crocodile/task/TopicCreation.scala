@@ -1,10 +1,10 @@
-package fr.xebia.ldi.crocodile.task
-
+package fr.ps.eng.ldi.crocodile.task
 
 import java.util.concurrent.ExecutionException
 
 import cats.syntax.either._
-import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.Configuration.CrocoConfig
+import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
 import org.apache.kafka.clients.admin.{Admin, CreateTopicsResult, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}

@@ -1,9 +1,9 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
 import java.util.Properties
 
 import com.typesafe.config.{Config, ConfigFactory}
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig.{CrocoApp, CrocoTask, CrocoTopic}
+import Configuration.CrocoConfig.{CrocoApp, CrocoTask, CrocoTopic}
 import org.apache.avro.reflect.AvroSchema
 import pureconfig.generic.ProductHint
 import pureconfig.{CamelCase, ConfigFieldMapping, StringDelimitedNamingConvention}

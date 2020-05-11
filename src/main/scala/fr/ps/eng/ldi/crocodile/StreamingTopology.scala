@@ -1,11 +1,11 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig
-import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
+import fr.ps.eng.ldi.crocodile.Configuration.CrocoConfig
+import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.scala.StreamsBuilder
-import org.apache.kafka.streams.scala.kstream.{Consumed, Joined, KStream, KTable, Produced}
+import org.apache.kafka.streams.scala.kstream._
 
 /**
  * Created by loicmdivad.

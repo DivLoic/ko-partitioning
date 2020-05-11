@@ -1,10 +1,11 @@
-package fr.xebia.ldi.crocodile.task.consumer
+package fr.ps.eng.ldi.crocodile.task.consumer
 
 import java.util.UUID
 
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig
-import fr.xebia.ldi.crocodile.schema.{Account, AccountId}
-import fr.xebia.ldi.crocodile.{ColorizedConsumer, CrocoSerde}
+import fr.ps.eng.ldi.crocodile.Configuration._
+import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId}
+import fr.ps.eng.ldi.crocodile.{ColorizedConsumer, CrocoSerde}
+import org.apache.kafka.clients.admin.{Admin, NewTopic}
 import org.apache.kafka.streams.kstream.{Produced, ValueTransformerWithKey}
 import org.apache.kafka.streams.processor.{ProcessorContext, PunctuationType, Punctuator}
 import org.apache.kafka.streams.scala.kstream.{Consumed, KTable, Materialized}
@@ -13,14 +14,12 @@ import org.apache.kafka.streams.state.{ReadOnlyKeyValueStore, ValueAndTimestamp}
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
-
-import scala.reflect.io.File
-import scala.jdk.DurationConverters._
-import scala.jdk.CollectionConverters._
-import fr.xebia.ldi.crocodile.Configuration._
-import org.apache.kafka.clients.admin.{Admin, NewTopic}
 import pureconfig.generic.auto._
 
+import pureconfig.generic.auto._
+import scala.jdk.CollectionConverters._
+import scala.jdk.DurationConverters._
+import scala.reflect.io.File
 import scala.util.Try
 
 /**

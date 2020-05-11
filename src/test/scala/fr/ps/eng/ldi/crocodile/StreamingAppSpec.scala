@@ -1,16 +1,16 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
 import com.typesafe.config.ConfigFactory
-import fr.xebia.ldi.crocodile.Configuration.CrocoConfig.{CrocoApp, CrocoTopic}
-import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
-import fr.xebia.ldi.crocodile.schema.Account.{Free, Gold, Plus}
-import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
+import fr.ps.eng.ldi.crocodile.Configuration.CrocoConfig.{CrocoApp, CrocoTopic}
+import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.schema.Account.{Free, Gold, Plus}
+import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import org.apache.kafka.streams.test.TestRecord
 import org.apache.kafka.streams.{TestInputTopic, TestOutputTopic, TopologyTestDriver}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
 
 import scala.jdk.CollectionConverters._
 

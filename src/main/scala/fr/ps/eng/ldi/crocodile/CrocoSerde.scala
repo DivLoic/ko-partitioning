@@ -1,6 +1,6 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
-import fr.xebia.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
+import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
 import org.apache.kafka.common.serialization.Serde
 
 /**

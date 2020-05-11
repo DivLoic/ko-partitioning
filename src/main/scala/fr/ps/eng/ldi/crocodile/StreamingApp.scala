@@ -1,11 +1,11 @@
-package fr.xebia.ldi.crocodile
+package fr.ps.eng.ldi.crocodile
 
-import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.StreamingTopology.buildTopology
 import org.apache.kafka.streams.KafkaStreams
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
-import StreamingTopology.buildTopology
 
 import scala.jdk.CollectionConverters._
 

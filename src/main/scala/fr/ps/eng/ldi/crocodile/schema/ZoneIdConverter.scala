@@ -1,4 +1,4 @@
-package fr.xebia.ldi.crocodile.schema
+package fr.ps.eng.ldi.crocodile.schema
 
 import java.time.ZoneId
 import java.time.format.TextStyle

@@ -1,8 +1,8 @@
-package fr.xebia.ldi.crocodile.task.consumer
+package fr.ps.eng.ldi.crocodile.task.consumer
 
-import fr.xebia.ldi.crocodile.Configuration.{CrocoConfig, _}
-import fr.xebia.ldi.crocodile.schema.{AccountId, UserEvent}
-import fr.xebia.ldi.crocodile.{ColorizedConsumer, CrocoSerde}
+import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
+import fr.ps.eng.ldi.crocodile.schema.{AccountId, UserEvent}
+import fr.ps.eng.ldi.crocodile.{ColorizedConsumer, CrocoSerde}
 import org.apache.kafka.streams.kstream.Printed
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream.Consumed

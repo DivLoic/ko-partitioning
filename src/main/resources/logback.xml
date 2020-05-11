@@ -12,7 +12,7 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="fr.xebia.ldi" level="INFO" additivity="false">
+    <logger name="fr.ps.eng.ldi" level="INFO" additivity="false">
         <appender-ref ref="STDOUT" />
 
     </logger>
