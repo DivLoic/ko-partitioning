@@ -4,9 +4,8 @@ import fr.ps.eng.ldi.crocodile.Configuration.CrocoConfig
 import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.kstream.GlobalKTable
 import org.apache.kafka.streams.scala.kstream._
-import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, StreamsBuilder}
+import org.apache.kafka.streams.scala.{ByteArrayKeyValueStore, Serdes, StreamsBuilder}
 
 /**
  * Created by loicmdivad.
@@ -21,29 +20,38 @@ object StreamingTopology {
                     s3: Serde[AccountId],
                     s4: Serde[UserEvent]): Topology = {
 
-    implicit val consumedClick: Consumed[AccountId, Click] =  Consumed.`with`
+    implicit val stringSerde: Serde[String] = Serdes.String
+
+    implicit val consumedClick: Consumed[String, Click] =  Consumed.`with`
 
     implicit val consumedAccount: Consumed[AccountId, Account] =  Consumed.`with`
 
-    implicit val materializedAccount: Materialized[AccountId, Account, ByteArrayKeyValueStore] = Materialized.`with`
+    implicit val materializedAccount: Materialized[String, Account, ByteArrayKeyValueStore] = Materialized.`with`
 
-    implicit val joinedClick: Joined[AccountId, Click, Account] = Joined.`with`
+    implicit val groupedAccount: Grouped[String, Account] = Grouped.`with`
 
-    implicit val producedClick: Produced[AccountId, UserEvent] = Produced.`with`
+    implicit val joinedClick: Joined[String, Click, Account] = Joined.`with`
 
-    val clickStreams: KStream[AccountId, Click] = builder.stream(config.application.inputClickTopic.name)
+    implicit val producedClick: Produced[String, UserEvent] = Produced.`with`
 
-    val accountTable: GlobalKTable[AccountId, Account] = builder
-      .globalTable(config.application.inputAccountTopic.name, materializedAccount)
+    val clickStreams: KStream[String, Click] = builder.stream(config.application.inputClickTopic.name)
 
-    val newClicks: KStream[AccountId, UserEvent] = clickStreams.leftJoin(accountTable)(
-      (id, _) => id,
-      (click, maybeAccount) => Option(maybeAccount).map(account => UserEvent(account, click)).orNull
-    )
+    val accountTable: KTable[String, Account] = builder
+
+      .stream(config.application.inputAccountTopic.name)(consumedAccount)
+
+      .selectKey((key, _) => key.value)
+
+      .toTable(materializedAccount)
+
+    val newClicks: KStream[String, UserEvent] = clickStreams.leftJoin(accountTable){ (click, maybeAccount) =>
+
+        Option(maybeAccount).map(account => UserEvent(account, click)).orNull
+
+      }
 
     newClicks.to(config.application.outputResult.name)
 
     builder.build
   }
-
 }

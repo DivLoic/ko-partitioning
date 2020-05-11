@@ -4,7 +4,7 @@ import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.ps.eng.ldi.crocodile.schema.{AccountId, UserEvent}
 import fr.ps.eng.ldi.crocodile.{ColorizedConsumer, CrocoSerde}
 import org.apache.kafka.streams.kstream.Printed
-import org.apache.kafka.streams.scala.StreamsBuilder
+import org.apache.kafka.streams.scala.{Serdes, StreamsBuilder}
 import org.apache.kafka.streams.scala.kstream.Consumed
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.slf4j.LoggerFactory
@@ -24,11 +24,10 @@ object ClickStream extends App with ColorizedConsumer with CrocoSerde  {
 
     val streamConfig = config.kafkaConfig.toMap + ((StreamsConfig.APPLICATION_ID_CONFIG, s"CLICK-CONSUMER"))
 
-    implicit val consumedUserEvent: Consumed[AccountId, UserEvent] =
-      Consumed.`with`(accountIdSerde, userEventSerde).withName("user-event-consumer")
+    implicit val consumedUserEvent: Consumed[String, UserEvent] =
+      Consumed.`with`(Serdes.String, userEventSerde).withName("user-event-consumer")
 
     userEventSerde.configure(streamConfig.asJava, false)
-    accountIdSerde.configure(streamConfig.asJava, true)
 
     val builder = new StreamsBuilder
 
@@ -36,9 +35,9 @@ object ClickStream extends App with ColorizedConsumer with CrocoSerde  {
 
       .stream(config.application.outputResult.name)
 
-      .selectKey((account, _) => account.copy(colorize(account.value)))
+      .selectKey((account, _) => colorize(account))
 
-      .print(Printed.toSysOut[AccountId, UserEvent].withLabel("📱CLICKS"))
+      .print(Printed.toSysOut[String, UserEvent].withLabel("📱CLICKS"))
 
 
     val streams = new KafkaStreams(builder.build, streamConfig.toProps)
@@ -50,5 +49,4 @@ object ClickStream extends App with ColorizedConsumer with CrocoSerde  {
     streams.start()
 
   }
-
 }

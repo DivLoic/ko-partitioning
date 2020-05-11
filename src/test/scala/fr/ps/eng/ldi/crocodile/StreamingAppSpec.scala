@@ -6,6 +6,7 @@ import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.ps.eng.ldi.crocodile.schema.Account.{Free, Gold, Plus}
 import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click, UserEvent}
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
+import org.apache.kafka.streams.scala.Serdes
 import org.apache.kafka.streams.test.TestRecord
 import org.apache.kafka.streams.{TestInputTopic, TestOutputTopic, TopologyTestDriver}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -26,9 +27,9 @@ class StreamingAppSpec extends AnyFlatSpec
 
   var testDriver: TopologyTestDriver = _
 
-  var inputClickTopic: TestInputTopic[AccountId, Click] = _
+  var inputClickTopic: TestInputTopic[String, Click] = _
   var inputAccountTopic: TestInputTopic[AccountId, Account] = _
-  var outputResult: TestOutputTopic[AccountId, UserEvent] = _
+  var outputResult: TestOutputTopic[String, UserEvent] = _
 
   val testConfig: CrocoConfig = CrocoConfig(
     kafkaConfig = ConfigFactory.parseMap( Map(
@@ -67,7 +68,7 @@ class StreamingAppSpec extends AnyFlatSpec
 
     inputClickTopic = testDriver.createInputTopic(
       testConfig.application.inputClickTopic.name,
-      accountIdSerde.serializer(),
+      Serdes.String.serializer(),
       clickSerde.serializer()
     )
 
@@ -79,7 +80,7 @@ class StreamingAppSpec extends AnyFlatSpec
 
     outputResult = testDriver.createOutputTopic(
       testConfig.application.outputResult.name,
-      accountIdSerde.deserializer(),
+      Serdes.String.deserializer(),
       userEventSerde.deserializer()
     )
   }
@@ -96,17 +97,17 @@ class StreamingAppSpec extends AnyFlatSpec
 
     And("...")
     inputClickTopic.pipeRecordList(
-      new TestRecord(AccountId("2"), Click("random-page-id")) :: Nil asJava
+      new TestRecord("2", Click("random-page-id")) :: Nil asJava
     )
 
     When("...")
     val resultNum: Long = outputResult.getQueueSize
-    val result: Vector[TestRecord[AccountId, UserEvent]] = outputResult.readRecordsToList().asScala.toVector
+    val result: Vector[TestRecord[String, UserEvent]] = outputResult.readRecordsToList().asScala.toVector
 
     Then("...")
 
     resultNum shouldBe 1
-    result.map(_.getKey) should contain only AccountId("2")
+    result.map(_.getKey) should contain only "2"
     result.map(_.getValue.login) should contain only "login2"
     result.map(_.getValue.plan) should contain only Some(Gold)
     result.map(_.getValue.pageId) should contain only "random-page-id"

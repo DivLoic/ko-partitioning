@@ -18,6 +18,7 @@ import fr.ps.eng.ldi.crocodile.task.producer.AccountActor.Start
 import fr.ps.eng.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.streams.scala.Serdes
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
@@ -57,9 +58,9 @@ object DataGeneration extends App with CrocoSerde {
       accountSerde.serializer()
     )
 
-    val clickProducer = new KafkaProducer[AccountId, Click](
+    val clickProducer = new KafkaProducer[String, Click](
       config.kafkaConfig.toMap.asJava,
-      accountIdSerde.serializer(),
+      Serdes.String.serializer(),
       clickSerde.serializer()
     )
 
@@ -96,7 +97,7 @@ object DataGeneration extends App with CrocoSerde {
 
       for (index <- 0 to 3) {
         Thread.sleep(1000)
-        val id = AccountId(s"ID-00$index")
+        val id = s"ID-00$index"
         val click = Click(UUID.randomUUID().toString)
         val record = new ProducerRecord("CLICK-TOPIC", id, click)
         clickProducer.send(record)
