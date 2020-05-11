@@ -13,14 +13,11 @@ import cats.syntax.either._
 import fr.ps.eng.ldi.crocodile.Configuration.{CrocoConfig, _}
 import fr.ps.eng.ldi.crocodile.schema.Account.{AccountUpdate, Free}
 import fr.ps.eng.ldi.crocodile.schema.{Account, AccountId, Click}
-import fr.ps.eng.ldi.crocodile.task.DataGeneration.CustomPartitioner.ConstPartitioner
 import fr.ps.eng.ldi.crocodile.task.producer.AccountActor
 import fr.ps.eng.ldi.crocodile.task.producer.AccountActor.Start
 import fr.ps.eng.ldi.crocodile.{CrocoSerde, schemaNameMap}
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
-import org.apache.kafka.clients.producer.internals.DefaultPartitioner
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
-import org.apache.kafka.common.Cluster
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
@@ -55,7 +52,7 @@ object DataGeneration extends App with CrocoSerde {
     })
 
     val accountProducer = new KafkaProducer[AccountId, Account](
-      config.kafkaConfig.toMap + ((ProducerConfig.PARTITIONER_CLASS_CONFIG, classOf[ConstPartitioner])) asJava,
+      config.kafkaConfig.toMap.asJava,
       accountIdSerde.serializer(),
       accountSerde.serializer()
     )
@@ -122,11 +119,4 @@ object DataGeneration extends App with CrocoSerde {
         system.terminate()
         sys.exit(1)
     }
-
-  object CustomPartitioner {
-
-    class ConstPartitioner extends DefaultPartitioner {
-      override def partition(a: String, b: Any, c: Array[Byte], d: Any, e: Array[Byte], f: Cluster): Int = 2
-    }
-  }
 }

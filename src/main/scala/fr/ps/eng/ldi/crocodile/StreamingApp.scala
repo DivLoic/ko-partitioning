@@ -5,6 +5,7 @@ import fr.ps.eng.ldi.crocodile.StreamingTopology.buildTopology
 import org.apache.kafka.streams.KafkaStreams
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
+
 import pureconfig.generic.auto._
 
 import scala.jdk.CollectionConverters._
