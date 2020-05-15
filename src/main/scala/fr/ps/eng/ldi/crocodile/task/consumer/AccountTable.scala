@@ -56,14 +56,13 @@ object AccountTable extends App with ColorizedConsumer with CrocoSerde {
 
     val builder = new StreamsBuilder
 
-    builder
+    val accountTable: KTable[AccountId, Account] = builder
 
       .stream(config.application.inputAccountTopic.name)
 
-      .to(InternalAccountTopic)
+      .through(InternalAccountTopic)
 
-    val accountTable: KTable[AccountId, Account] = builder
-      .table(InternalAccountTopic, materializedAccount)
+      .toTable(materializedAccount)
 
     accountTable
       .transformValues(() => new ValueTransformerWithKey[AccountId, Account, Unused] {
@@ -87,7 +86,7 @@ object AccountTable extends App with ColorizedConsumer with CrocoSerde {
                 val header: String = TableLineBorder
                 val lines: List[String] = store.all().asScala.toList.flatMap(kv => makeLine(kv.key, kv.value))
 
-                tmpTableFile.writeAll((header :: lines) map(_ + "\n") map(colorize):_*)
+                tmpTableFile.writeAll("\n" :: (header :: lines) map(_ + "\n") map colorize:_*)
 
               }
             })
