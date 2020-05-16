@@ -12,9 +12,12 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
+    <logger name="org.apache.kafka.clients.NetworkClient" level="ERROR" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <logger name="fr.ps.eng.ldi" level="INFO" additivity="false">
         <appender-ref ref="STDOUT" />
-
     </logger>
 
     <root level="WARN">
