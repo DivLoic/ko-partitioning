@@ -1,6 +1,7 @@
 package fr.ps.eng.ldi.crocodile.schema
 
 import com.sksamuel.avro4s.{AvroName, RecordFormat}
+import fr.ps.eng.ldi.crocodile.ColorizedConsumer.colorizePlan
 import fr.ps.eng.ldi.crocodile.schema.Account.{AccountUpdate, Plan}
 
 /**
@@ -13,8 +14,9 @@ case class UserEvent(@AvroName("page_id")
                      @AvroName("last_update")
                      lastUpdate: AccountUpdate) {
 
-  override def toString: String =
-    s"event: ${pageId.take(6)}..., plan: ${plan.orElse(None).map(_.toString.padTo(6, " ").mkString).orNull} ($login)"
+
+  override def toString: String = s"event: ${pageId.take(6)}...," +
+      s" plan: ${plan.map(p => colorizePlan(p.toString.padTo(6, " ").mkString)).orNull} ($login)"
 
 }
 
