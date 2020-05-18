@@ -35,6 +35,11 @@ dependencies {
     implementation group: 'io.confluent', name: 'kafka-avro-serializer', version: '5.5.0'
     implementation group: 'io.confluent', name: 'kafka-streams-avro-serde', version: '5.5.0'
 
+    implementation group: 'org.scalacheck', name: 'scalacheck_2.13', version: '1.14.0'
+
+    implementation group: 'com.typesafe.akka', name: 'akka-stream_2.13', version: '2.5.30'
+    implementation group: 'com.typesafe.akka', name: 'akka-stream-kafka_2.13', version: '2.0.3'
+
     testImplementation group: 'org.scalactic', name: 'scalactic_2.13', version: '3.1.1'
     testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: '3.1.1'
     testImplementation group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.5.0'
@@ -85,8 +90,8 @@ class CleanUpState extends DefaultTask {
 
     @TaskAction
     void clean() {
-        new File("/tmp/kafka-streams/ACCOUNT-CONSUMER").deleteDir()
-        new File("/tmp/kafka-streams/CLICK-JOINER-APP").deleteDir()
+        new File("/tmp/kafka-streams/ACCOUNT-CONSUMER/").deleteDir()
+        new File("/tmp/kafka-streams/CLICK-JOINER-APP/").deleteDir()
     }
 }
 
