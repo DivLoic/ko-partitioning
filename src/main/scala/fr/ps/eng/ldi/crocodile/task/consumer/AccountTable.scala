@@ -1,5 +1,6 @@
 package fr.ps.eng.ldi.crocodile.task.consumer
 
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import fr.ps.eng.ldi.crocodile.Configuration._
@@ -29,6 +30,10 @@ object AccountTable extends App with ColorizedConsumer with CrocoSerde {
 
   val logger = LoggerFactory.getLogger(getClass)
   val tmpTableFile: File = File(s"/tmp/${UUID.randomUUID().toString}.txt")
+
+  def accountTimeFormat(account: Account) = DateTimeFormatter
+    .ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    .withZone(account.lastUpdate.zoneId)
 
   val InternalAccountTopic = "ACCOUNT-TOPIC-CONSUMER-REPARTITION"
 
@@ -118,11 +123,14 @@ object AccountTable extends App with ColorizedConsumer with CrocoSerde {
         " + ".padTo(10, "-").mkString +
         " + ".padTo(30, "-").mkString + " +"
 
-    def makeLine(accountId: AccountId, tsAccount: ValueAndTimestamp[Account]): List[String] =
+    def makeLine(accountId: AccountId, tsAccount: ValueAndTimestamp[Account]): List[String] = {
+      val account = tsAccount.value()
+
       s"| ${accountId.value}".padTo(10, " ").mkString +
-        s"| ${tsAccount.value().login}".padTo(20, " ").mkString +
-        s"| ${tsAccount.value().plan.getOrElse(Account.None)}".padTo(10, " ").mkString +
-        s"| ${tsAccount.value().lastUpdate.datetime.toString}".padTo(30, " ").mkString + "|" ::
+        s"| ${account.login}".padTo(20, " ").mkString +
+        s"| ${account.plan.getOrElse(Account.None)}".padTo(10, " ").mkString +
+        s"| ${account.lastUpdate.datetime.format(accountTimeFormat(account))}".padTo(30, " ").mkString + "|" ::
         TableLineBorder :: Nil
+    }
   }
 }

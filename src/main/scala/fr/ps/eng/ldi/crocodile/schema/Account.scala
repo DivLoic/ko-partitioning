@@ -1,6 +1,6 @@
 package fr.ps.eng.ldi.crocodile.schema
 
-import java.time.{LocalDateTime, ZoneId, ZoneOffset}
+import java.time.{LocalDateTime, ZoneId}
 
 import com.sksamuel.avro4s.{AvroName, RecordFormat}
 import fr.ps.eng.ldi.crocodile.schema.Account.{AccountUpdate, Plan}
@@ -26,6 +26,6 @@ object Account extends ZoneIdConverter {
   case class AccountUpdate(datetime: LocalDateTime, zoneId: ZoneId)
 
   object AccountUpdate {
-    def apply(): AccountUpdate = new AccountUpdate(LocalDateTime.now(), ZoneId.of(ZoneOffset.UTC.getId))
+    def apply(): AccountUpdate = new AccountUpdate(LocalDateTime.now(), ZoneId.systemDefault())
   }
 }
