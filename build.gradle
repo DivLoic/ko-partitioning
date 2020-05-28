@@ -59,7 +59,8 @@ tasks.withType(ScalaCompile) {
     ]
 }
 
-jib.to.image "${project.name}:${project.version}"
+jib.to.image "${project.name}-datagen:${project.version}"
+jib.container.jvmFlags = ['-Duser.timezone=Europe/Paris']
 jib.container.mainClass "${project.group}.task.DataGeneration"
 
 dockerCompose.dockerComposeFile "docker-compose.yml"
