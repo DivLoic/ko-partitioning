@@ -8,9 +8,9 @@ Motivation: Kafka Streams let's you perform joins of multiple streams in real ti
 In this context of distributed data, how Kafka Streams instances bring matching record together 
 without any direct shuffle?  
 
+This module illustrates one of the properties that makes this possible.
 
 ## Requirements:
 - Jdk1.8+
 - Docker
 - watch
-
