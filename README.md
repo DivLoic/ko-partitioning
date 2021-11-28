@@ -19,15 +19,7 @@ This module illustrates one of the properties that makes this possible.
 
 ## Demo steps
 Each steps of the demo has its own branch and goes through how partitions affect a Kafka Streams application.
-
-### Step 0
 Let's say for example you try to join to streams (KStreams-KTable) without any processing. 
 In this case Kafka Streams has your back!
 
 [![asciicast](https://asciinema.org/a/331595.svg)](https://asciinema.org/a/331595)
-  
-### Step 1
-### Step 2
-### Step 3
-### Step 4
-
